@@ -202,7 +202,7 @@ export default {
           `https://restapi.amap.com/v3/geocode/regeo?location=${this.center[0]},${this.center[1]}&key=c91607badc2777c98085643173b9c1ef`
         )
         .then(res => {
-          console.log(res.data.regeocode.formatted_address);
+          // console.log(res.data.regeocode.formatted_address);
           this.currentPosition = res.data.regeocode.formatted_address;
         });
     },
@@ -241,16 +241,16 @@ export default {
       // });
       // let geolocation = this.$refs.map.$$getInstance();
       //  获取位置信息
-      console.log("重新定位");
+      // console.log("重新定位");
 
       this.examp.getCurrentPosition((status, result) => {
-        console.log(result);
+        // console.log(result);
         self.range = result.accuracy;
         self.isConverted = result.isConverted;
         self.location_type = result.location_type;
         self.currentPosition = result.formattedAddress;
         if (result && result.position) {
-          console.log(status, result);
+          // console.log(status, result);
           self.lng = result.position.lng; //设置经度
           self.lat = result.position.lat; //设置维度
           self.center = [self.lng, self.lat]; //设置中心坐标
