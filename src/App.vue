@@ -1,6 +1,11 @@
 <template>
   <div id="app">
     <div v-show="amapShow" class="amap-demo">
+      <el-amap-search-box
+        class="search-box"
+        :search-option="searchOption"
+        :on-search-result="onSearchResult"
+      ></el-amap-search-box>
       <el-amap
         ref="map"
         vid="amap"
@@ -11,13 +16,14 @@
       >
         <el-amap-circle
           ref="amapCircle"
-          :center="marker.center"
-          :radius="marker.radius"
-          :strokeColor="marker.strokeColor"
-          :fill-color="marker.fillColor"
-          :fill-opacity="marker.fillOpacity"
-          :events="marker.events"
+          :center="circle.center"
+          :radius="circle.radius"
+          :strokeColor="circle.strokeColor"
+          :fill-color="circle.fillColor"
+          :fill-opacity="circle.fillOpacity"
+          :events="circle.events"
         ></el-amap-circle>
+        <el-amap-marker v-for="(marker,index) in markers" :position="marker" :key="index"></el-amap-marker>
       </el-amap>
     </div>
     <!-- <div style="height:20%;padding-top:20px;" v-show="!amapShow">
@@ -85,6 +91,16 @@ export default {
   data() {
     let self = this;
     return {
+      markers: [
+        [121.59996, 31.197646],
+        [121.40018, 31.197622],
+        [121.69991, 31.207649]
+      ],
+      searchOption: {
+        city: "上海",
+        citylimit: true
+      },
+      mapCenter: [121.59996, 31.197646],
       isConverted: "",
       location_type: "",
       range: "",
@@ -109,7 +125,7 @@ export default {
       currentPosition: "",
       lat: 0,
       loaded: false,
-      marker: {
+      circle: {
         center: [116.43137, 39.94024],
         radius: 100,
         fillOpacity: 0.5,
@@ -151,30 +167,30 @@ export default {
             init(o) {
               // o 是高德地图定位插件实例
               self.examp = o;
-              self.getLocation();
+              // self.getLocation();
 
-              // console.log("初始化");
-              // o.getCurrentPosition((status, result) => {
-              //   console.log(result);
-              //   self.range = result.accuracy;
-              //   self.isConverted = result.isConverted;
-              //   self.location_type = result.location_type;
-              //   self.currentPosition = result.formattedAddress;
-              //   if (result && result.position) {
-              //     console.log(status, result);
-              //     self.lng = result.position.lng; //设置经度
-              //     self.lat = result.position.lat; //设置维度
-              //     self.center = [self.lng, self.lat]; //设置中心坐标
-              //     self.marker.center = self.center;
-              //     // self.marker.center = [self.lng, self.lat]
-              //     self.loaded = true;
-              //     self.$nextTick(() => {
-              //       self.checkPosition();
-              //       self.getInfo();
-              //       // self.getLocation();
-              //     });
-              //   }
-              // });
+              console.log("初始化");
+              o.getCurrentPosition((status, result) => {
+                console.log(result);
+                self.range = result.accuracy;
+                self.isConverted = result.isConverted;
+                self.location_type = result.location_type;
+                self.currentPosition = result.formattedAddress;
+                if (result && result.position) {
+                  console.log(status, result);
+                  self.lng = result.position.lng; //设置经度
+                  self.lat = result.position.lat; //设置维度
+                  self.center = [self.lng, self.lat]; //设置中心坐标
+                  self.circle.center = self.center;
+                  // self.circle.center = [self.lng, self.lat]
+                  self.loaded = true;
+                  self.$nextTick(() => {
+                    self.checkPosition();
+                    self.getInfo();
+                    // self.getLocation();
+                  });
+                }
+              });
             },
             click() {
               // console.log(o);
@@ -195,6 +211,24 @@ export default {
     };
   },
   methods: {
+    onSearchResult(pois) {
+      console.log(pois);
+      let latSum = 0;
+      let lngSum = 0;
+      if (pois.length > 0) {
+        pois.forEach(poi => {
+          let { lng, lat } = poi;
+          lngSum += lng;
+          latSum += lat;
+          this.markers.push([poi.lng, poi.lat]);
+        });
+        let center = {
+          lng: lngSum / pois.length,
+          lat: latSum / pois.length
+        };
+        this.center = [center.lng, center.lat];
+      }
+    },
     getInfo() {
       axios
         .get(
@@ -241,20 +275,20 @@ export default {
       // });
       // let geolocation = this.$refs.map.$$getInstance();
       //  获取位置信息
-      // console.log("重新定位");
+      console.log("重新定位");
 
       this.examp.getCurrentPosition((status, result) => {
-        // console.log(result);
+        console.log(result);
         self.range = result.accuracy;
         self.isConverted = result.isConverted;
         self.location_type = result.location_type;
         self.currentPosition = result.formattedAddress;
         if (result && result.position) {
-          // console.log(status, result);
+          console.log(status, result);
           self.lng = result.position.lng; //设置经度
           self.lat = result.position.lat; //设置维度
           self.center = [self.lng, self.lat]; //设置中心坐标
-          self.marker.center = [self.lng, self.lat];
+          self.circle.center = [self.lng, self.lat];
           self.loaded = true;
           self.$nextTick(() => {
             self.checkPosition();
@@ -337,5 +371,18 @@ body {
 }
 .toolbar {
   height: 10%;
+}
+.amap-demo {
+  height: 300px;
+}
+
+.search-box {
+  position: absolute;
+  top: 25px;
+  left: 20px;
+}
+
+.amap-page-container {
+  position: relative;
 }
 </style>
