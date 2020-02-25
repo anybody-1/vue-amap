@@ -15,8 +15,8 @@ Vue.use(Button)
   .use(Steps)
   .use(Step)
 VueAMap.initAMapApiLoader({
-  key: '5d2e3b9f9ab5939629c47d71e554a549',
-  // key: 'c91607badc2777c98085643173b9c1ef',
+  key: '5d2e3b9f9ab5939629c47d71e554a549',//js Api
+  // key: 'c91607badc2777c98085643173b9c1ef',//web服务
   plugin: [
     'AMap.Autocomplete',
     'AMap.PlaceSearch',
